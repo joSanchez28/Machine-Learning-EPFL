@@ -10,8 +10,9 @@
 # - pandas
 # - matplotlib
 # - seaborn
+# - keras
 
-# In[1]:
+# In[3]:
 
 
 import pandas as pd
@@ -26,7 +27,7 @@ import seaborn as sns
 get_ipython().magic(u'matplotlib inline')
 
 
-# In[2]:
+# In[4]:
 
 
 DATA_FOLDER = './data/' #The data is in the .gitignore in order to not upload it to the GitHub repository
@@ -34,7 +35,7 @@ DATA_FOLDER = './data/' #The data is in the .gitignore in order to not upload it
 
 # Execute the following line to export from the jupyter notebook(.ipynb) to a .py file (ignore the warnings):
 
-# In[54]:
+# In[5]:
 
 
 #!jupyter nbconvert --to script Project2-Notebook.ipynb 
@@ -47,7 +48,7 @@ DATA_FOLDER = './data/' #The data is in the .gitignore in order to not upload it
 # First we load the data into a Pandas data frame (with the Pandas library; to install this package with conda run:
 # `conda install -c anaconda pandas`):
 
-# In[4]:
+# In[6]:
 
 
 df_interior_features = pd.read_csv(DATA_FOLDER + 'T_features.csv')
@@ -56,19 +57,19 @@ df_labels_and_features = pd.read_csv(DATA_FOLDER + 'table_dataset_GreeceSwitzerl
 
 # Let's see what is inside `table_dataset_GreeceSwitzerland_N265_metrics_mSC5_JPEGtoBMP_Michelson_RMS.csv`:
 
-# In[5]:
+# In[7]:
 
 
 df_labels_and_features.head(7)
 
 
-# In[6]:
+# In[8]:
 
 
 df_labels_and_features.shape
 
 
-# In[7]:
+# In[9]:
 
 
 df_labels_and_features.columns
@@ -88,19 +89,19 @@ df_labels_and_features.columns
 
 # Now let's see what is inside `T_features.csv`:
 
-# In[8]:
+# In[10]:
 
 
 df_interior_features.head()
 
 
-# In[9]:
+# In[11]:
 
 
 df_interior_features.shape
 
 
-# In[10]:
+# In[12]:
 
 
 df_interior_features.columns
@@ -122,13 +123,13 @@ df_interior_features.columns
 # 
 # Secondly, the labels (outputs) of our new data frame are the data that comes from every survey (which has been done by each person): 'pleasant', 'interesting', 'exciting', 'calming', 'complex', 'bright', 'view', 'spacious'. We are asked to study first the 'exciting' and the 'calming' labels but we will split the data frame afterwards.
 
-# In[11]:
+# In[13]:
 
 
 df_labels_and_features.head(1)
 
 
-# In[12]:
+# In[14]:
 
 
 df_interior_features.head(1)
@@ -136,7 +137,7 @@ df_interior_features.head(1)
 
 # For doing the join, we check that one of the metrics determine totally the interior (there are not two interiors with the same metric value):
 
-# In[13]:
+# In[15]:
 
 
 df_interior_features["to_join"]=(1000*df_interior_features["contrast_mean_RMS"]).astype(int) #We cannot do the join on the float
@@ -145,7 +146,7 @@ df_labels_and_features["to_join"]=(1000*df_labels_and_features["contrast_mean_RM
 df_interior_features.set_index("to_join").index.is_unique
 
 
-# In[14]:
+# In[16]:
 
 
 df_ml = df_interior_features.merge(df_labels_and_features, on = "to_join", how = 'inner', suffixes = ("_a",""))
@@ -154,7 +155,7 @@ df_ml.head(1)
 
 # Now we drop the duplicates columns and order the columns in order to have a data frame with the structure X|Y, where X is the matrix of features (each column is a feature) and Y is the matrix with the labels.
 
-# In[15]:
+# In[17]:
 
 
 df_ml = df_ml[['Country', 'Gender', 'Pattern', 'Context', 'SkyType', 'contrast_mean_mSC5', 'contrast_max_mSC5', 
@@ -164,7 +165,7 @@ df_ml = df_ml[['Country', 'Gender', 'Pattern', 'Context', 'SkyType', 'contrast_m
                'complex', 'bright', 'view', 'spacious']]
 
 
-# In[16]:
+# In[18]:
 
 
 df_ml.head(2)
@@ -172,7 +173,7 @@ df_ml.head(2)
 
 # We can also check and see that there are no missing values. (all instances are non-null)
 
-# In[17]:
+# In[19]:
 
 
 df_ml.info()
@@ -180,7 +181,7 @@ df_ml.info()
 
 # and see that all ratings are between 0 and 10:
 
-# In[18]:
+# In[20]:
 
 
 df_ml[['pleasant', 'interesting', 'exciting', 'calming', 'complex', 'bright',
@@ -189,14 +190,14 @@ df_ml[['pleasant', 'interesting', 'exciting', 'calming', 'complex', 'bright',
 
 # Finally, from this data frame is easy to get X and the labels desired (y) separately. So we get the data frame which contains the matrix of features X and, separately,the labels corresponding to 'exciting' and 'calming' (we were asked to analize this labels firstly):
 
-# In[19]:
+# In[21]:
 
 
 x_fdata = df_ml.iloc[:,0:16] #fdata -> first data without preprocessing
 x_fdata.head(5)
 
 
-# In[20]:
+# In[22]:
 
 
 y_data = df_ml["exciting"]
@@ -214,7 +215,7 @@ y_data.to_frame().head() #Note that y_data is a Pandas serie
 
 # We can confirm this by checking the type of data for each feature:
 
-# In[21]:
+# In[23]:
 
 
 x_fdata.dtypes
@@ -224,7 +225,7 @@ x_fdata.dtypes
 # 
 # Let's inspect these features closely:
 
-# In[22]:
+# In[24]:
 
 
 categorical_features = ['Country','Gender','Pattern','Context',                         'SkyType']
@@ -235,7 +236,7 @@ for feat in categorical_features:
 
 # In order to perform dummy variable encoding on the categorical features, we can use the pandas method `pd.get_dummies()`. Also since we need k-1 dummy variables to represent k categories, we can drop the first column for each encoding (`drop_first = True`). We'll store this as a new dataframe `dummy_df`.
 
-# In[23]:
+# In[25]:
 
 
 dummy_df = pd.get_dummies(x_fdata, columns=categorical_features, drop_first=False)
@@ -244,7 +245,7 @@ dummy_df.head(3)
 
 # We standardize the features in preparation for the training (output excluded, "exciting" column).
 
-# In[24]:
+# In[26]:
 
 
 x_without_std = dummy_df.copy() #x_without_std is the final standardized data (Just in case you want to use it)
@@ -254,7 +255,7 @@ for feat in dummy_df.columns.tolist():
     dummy_df[feat] = (dummy_df[feat] - mean)/std
 
 
-# In[25]:
+# In[27]:
 
 
 x_data = dummy_df #x_data will be the final standardized data
@@ -266,7 +267,7 @@ x_data = dummy_df #x_data will be the final standardized data
 
 # First let's plot the distribution of exciting
 
-# In[26]:
+# In[28]:
 
 
 print(y_data.describe())
@@ -278,7 +279,7 @@ sns.distplot(y_data, color='g');
 
 # Now we check the correlation between the **numeric** features and 'exciting'
 
-# In[27]:
+# In[29]:
 
 
 numeric_data = pd.concat([y_data, x_data], axis=1, sort=False).drop( [ 'Country_Greece', 'Country_Switzerland',
@@ -335,7 +336,7 @@ for feature in numeric_data.columns:
 # 
 # we can also demonstrate the linear regression line estimate for each feature.
 
-# In[31]:
+# In[114]:
 
 
 fig, ax = plt.subplots(round(len(numeric_data.columns) / 3), 3, figsize = (18, 12))
@@ -346,7 +347,7 @@ for i, ax in enumerate(fig.axes):
 
 # Now lets plot box plots for categorical features to see the relashionship between them and exciting
 
-# In[ ]:
+# In[115]:
 
 
 # we need the categorical variables in their originaL(non dummy) form
@@ -354,7 +355,7 @@ categ_data = x_fdata[categorical_features]
 
 
 
-# In[ ]:
+# In[116]:
 
 
 fig, ax = plt.subplots(round(len(categ_data.columns) / 3), 3, figsize = (18, 12))
@@ -366,7 +367,7 @@ for i, ax in enumerate(fig.axes):
 
 # we can also look at the distributions of categorical variabels
 
-# In[ ]:
+# In[117]:
 
 
 fig, axes = plt.subplots(round(len(categ_data.columns) / 3), 3, figsize=(12, 5))
@@ -382,7 +383,7 @@ fig.tight_layout()
 
 # Now lets take a look at the correlation between the **numeric** features
 
-# In[ ]:
+# In[118]:
 
 
 # remove the output variable
@@ -403,7 +404,7 @@ sns.heatmap(corr[(corr >= 0.7) | (corr <= -0.7)],
 
 # In order to split the data into the two sets (training and test), first we need to rejoin the y_data and the x_data. Then we can use the sample method (`pd.sample()`) which  randomly samples from the dataframe according to a given ratio (0.8 for train in this case). The remaining part of the data will be the test set.
 
-# In[ ]:
+# In[119]:
 
 
 #In order to split the data, we join then again:
@@ -411,20 +412,20 @@ data = pd.concat([y_data, x_data], axis=1, sort=False)
 data.head(1)
 
 
-# In[ ]:
+# In[120]:
 
 
 train_df = data.sample(frac=0.8,replace=False)
 test_df = data.drop(train_df.index.tolist(),axis=0)
 
 
-# In[ ]:
+# In[121]:
 
 
 train_df.head(3)
 
 
-# In[ ]:
+# In[122]:
 
 
 test_df.head(3)
@@ -432,7 +433,7 @@ test_df.head(3)
 
 # Quick check of the validity of the split by making sure that the size of the train plus the size of the test equals the size of the dummy:
 
-# In[ ]:
+# In[123]:
 
 
 print(train_df.shape[0] + test_df.shape[0] == dummy_df.shape[0])
@@ -440,7 +441,7 @@ print(train_df.shape[0] + test_df.shape[0] == dummy_df.shape[0])
 
 # Double check the mean of the features
 
-# In[ ]:
+# In[124]:
 
 
 #dummy_df.mean()
@@ -450,7 +451,7 @@ print(train_df.shape[0] + test_df.shape[0] == dummy_df.shape[0])
 
 # Now for the standart deviation
 
-# In[ ]:
+# In[125]:
 
 
 #dummy_df.std()
@@ -624,4 +625,39 @@ while(h<len(depths_DTR)):
 
 print(mse_DTR)
 print(mse_DTR_cross)
+
+
+# ## DENSE NEURAL NETWORKS
+
+# In[62]:
+
+
+# Use conda install -c conda-forge keras; conda install -c anaconda keras
+from keras.models import Sequential
+from keras import optimizers
+from keras.layers import Dense, Embedding, LSTM, SpatialDropout1D
+np.random.seed(7)
+
+embed_dim = 128
+lstm_out = 196
+max_features = len(x_data.values[1, :])
+
+def rnn_model():
+    #Create Model: interpreted as a sequence of layers https://keras.io/models/model/
+    model = Sequential() 
+    model.add(Embedding(max_features, embed_dim, input_length=len(x_data.values[0, :])))
+    model.add(SpatialDropout1D(0.4))
+    model.add(LSTM(lstm_out, dropout=0.2, recurrent_dropout=0.2)) # randomnly discard 0.2 for each node?
+    model.add(Dense(1, activation='softmax'))
+    
+    #Compile Model
+    model.compile(loss='mean_squared_error', optimizer='adam', metrics = ['accuracy']) # loss: categorical_crossentropy (possible?? have to vectorize "exiciting"?)  ;adam: efficient gradient descent
+    return(model)
+
+model = rnn_model()
+model.summary
+print(model.summary())
+model.fit(x_data, y_data, epochs=15, batch_size=32)
+    
+    
 
