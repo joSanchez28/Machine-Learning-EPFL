@@ -34,7 +34,7 @@ DATA_FOLDER = './data/' #The data is in the .gitignore in order to not upload it
 
 # Execute the following line to export from the jupyter notebook(.ipynb) to a .py file (ignore the warnings):
 
-# In[3]:
+# In[54]:
 
 
 #!jupyter nbconvert --to script Project2-Notebook.ipynb 
@@ -596,25 +596,32 @@ performance_results.sort_values(by = "accuracy", ascending=False).head(2)
 performance_results.sort_values(by = "mean_error_scorer", ascending=False).head(3)
 
 
-# In[41]:
+# ## Decision Trees
 
-
-## Decision Trees
-
-
-# In[48]:
+# In[100]:
 
 
 from sklearn import tree
 
+depths_DTR = np.arange(1,15,1); # deepness of the tree
+y_DTR = np.zeros((len(depths_DTR), len(y_data)));
+mse_DTR = np.zeros(len(depths_DTR));
+mse_DTR_cross = np.zeros(len(depths_DTR));
 
-# In[53]:
+h=0
+while(h<len(depths_DTR)):
+    DTR = tree.DecisionTreeRegressor(criterion='mse', splitter='best', max_depth=depths_DTR[h]) # min_weight_fraction_leaf?
+    DTR = DTR.fit(x_data, y_data)
 
+    #Using everything
+    y_DTR[h, :] = DTR.predict(x_data)
+    mse_DTR[h] = sum((y_DTR[h, :]-y_data.values)**2)/(len(y_data))
+    
+    #Using everything with cross validation
+    mse_DTR_cross[h] = cross_val_score(DTR, x_data, y_data, cv = 10, scoring='neg_mean_squared_error').mean()
+    
+    h=h+1
 
-DTR = tree.DecisionTreeRegressor(criterion='mse', splitter='best', random_state=0, max_depth = 1)
-DTR = DTR.fit(x_data, y_data)
-DTR_results = DTR.predict(x_data)
+print(mse_DTR)
+print(mse_DTR_cross)
 
-mse = sum((np.around(DTR_results)-y_data.values)**2)/(len(y_data))
-
-a = np.array([DTR_results, y_data.values])
