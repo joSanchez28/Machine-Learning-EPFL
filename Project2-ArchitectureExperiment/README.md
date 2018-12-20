@@ -1,30 +1,49 @@
-# An architecture experiment - EPFL Machine Learning
+# Architecture feelings - EPFL Machine Learning
 
 This is the second class project of the 2018 EPFL Machine Learning course.
-In this document you can see an overview of the project architecture and how to
-run it, as well as some useful information about the implementation. If you
-require more specific information, you can check the report (`report.pdf`).
+In this document you can see an overview of the project and how to
+run it, as well as some useful information about the requirements and the
+implementation. If you require more specific information, you can check the
+report (`report.pdf`).
 
 ## Project folders
-* `data/`. Directory with the input data, namely `test.csv` and `train.csv`
-given by the hosting lab collaborator.
-* `docs/`. Directory with the report in pdf `report.pdf` and in `report.tex`
-and the plots included in this report.  
+The project has the following folder (and file) structure:
+
+* `ArchitectureFeelings-Notebook.ipynb` Main Jupyter notebook where you can find the main development of the project. - If you want to follow the project development we really encourage you to see this notebook.
+* `Modeling_every_label_demo.ipynb` Second and last Jupyter notebook. In this notebook we extrapolate our study in the 'exciting' feeling to the rest of the feelings.
+* `data/`. Directory with the data sets given by the hosting lab collaborator,
+namely `T_features.csv` and
+`table_dataset_GreeceSwitzerland_N265_metrics_mSC5_JPEGtoBMP_Michelson_RMS.csv`; and also data sets generated, `original_data.parquet` and `pixels_compressed.parquet`.
+    * `BMP/` Directory containing the folders with the different images given by the hosting lab collaborator. For each scene we have the cube1,...,cube6 and cube_persp images.
+* `docs/`. Directory with the report in pdf `report.pdf` and in `report.tex`.
 * `scripts/` Python files
-    * `proj2_helpers.py`. Helper functions provided by the course.
-    * `implementations.py`. The main implementations we have required.
-    * `run.py`. Execute this file for obtaining the best prediction.
-    * `hyperparameters_and_plots.py`. For testing different models with
-    different hyperparameters. Using Ridge Regression and Cross Validation.
-    * `plots.py`. For creating the rest of the plots which appears in the report.
-* `out/` Directory with the file `csv` with our best result.
+    * `ArchitectureFeelings.py`. Just in case you can not (or you do not want to) run the code of `ArchitectureFeelings-Notebook.ipynb` with the Jupyter notebook; you can run this as an usual python script.
+    * `Modeling_every_label_demo.py`. Just in case you can not (or you do not want to) run the code of `Modeling_every_label_demo.ipynb`
+* `visualizations/` Directory containing the images (plots and visualizations) saved in during the notebooks execution.
+* `sklearn_models/` Directory with the most of the grid searches done in both notebooks and saved as `.pkl` with the joblib library.
+
 
 ## Requirements for running the project
-
-Only a computer with a valid installation of Python 3 is required.
-The packaged used are NumPy and Matplotlib, you can get them with pip tool:
+We recommend the [Anaconda environment](https://www.anaconda.com/download/) with Jupyter notebook for open and running both notebooks, `ArchitectureFeelings-Notebook.ipynb` and `Modeling_every_label_demo.ipynb`. A computer with a valid installation of Python 3 is required. For having this you can run in the anaconda prompt:
+* `conda update python` or `conda install python=3.6`
+NumPy and Matplotlib packages are used, you can get them with pip tool:
 * `pip3 install numpy`
 * `pip3 install matplotlib`
+The following packages are also required for running the whole notebooks:
+- [seaborn](https://seaborn.pydata.org/) for nice visualizations.
+- [scikit-learn](http://scikit-learn.org/stable/) ML methods .
+- [pandas](https://pandas.pydata.org/) for dealing with the data datasets  
+-pyarrow, neccesary for save in .parquet format.
+-[joblib](https://pypi.org/project/joblib/) for saving the skcikit-learn grid searches.
+-[imageio](https://pypi.org/project/imageio/) and scikit-image for dealing with the images.
+You can install them with conda run as below:
+* `conda install -c anaconda seaborn`
+* `conda install -c anaconda scikit-learn`
+* `conda install -c anaconda pandas`
+* `conda install -c conda-forge pyarrow` or `conda install -c conda-forge/label/gcc7 pyarrow`
+* `conda install -c anaconda joblib`
+* `conda install -c conda-forge imageio`
+* `conda install -c anaconda scikit-image`
 
 ## Running the project
 
