@@ -1,1 +1,1 @@
-# EPFL 2018-18, Machine Learning Projects
+# EPFL 2018-19, Machine Learning Projects
